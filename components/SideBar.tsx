@@ -1,16 +1,18 @@
 'use client'
 
-import { collection } from "firebase/firestore";
+import { collection, orderBy, query } from "firebase/firestore";
 import { db } from "../firebase";
 import { useSession, signOut } from "next-auth/react";
 import { useCollection } from "react-firebase-hooks/firestore";
 import NewChat from "./NewChat";
+import ChatRow from "./ChatRow";
+import ModelSelection from "./ModelSelection";
 
 function SideBar() {
     const { data: session } = useSession();
 
     const [chats, loading, error] = useCollection(
-        session && collection(db, 'users', session.user?.email!, 'chats')
+        session && query(collection(db, 'users', session.user?.email!, 'chats'), orderBy("createdAt", "asc"))
     );
 
     console.log(chats);
@@ -23,10 +25,17 @@ function SideBar() {
                 {/* NewChat */}
                 <NewChat/>
 
-
-                
-                <div>
+                <div className="hidden sm:inline">
                     {/* ModelSelection */}
+                    <ModelSelection/>
+                </div>
+
+                <div className="flex flex-col space-y-2 my-2">
+                    {loading && (
+                        <div className="animate-pulse text-center text-white">
+                            <p>Loading Chats...</p>
+                        </div>
+                    )}
                 </div>
 
                 {/* Map through the ChatRows */}
